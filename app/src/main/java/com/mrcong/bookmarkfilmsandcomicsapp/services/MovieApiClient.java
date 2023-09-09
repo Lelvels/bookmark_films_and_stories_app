@@ -6,109 +6,160 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
 import com.mrcong.bookmarkfilmsandcomicsapp.AppExecutors;
-import com.mrcong.bookmarkfilmsandcomicsapp.models.movies.Movie;
-import com.mrcong.bookmarkfilmsandcomicsapp.models.movies.QueryMovie;
-import com.mrcong.bookmarkfilmsandcomicsapp.response.QueryMovieResponse;
+import com.mrcong.bookmarkfilmsandcomicsapp.models.movies.MovieModel;
+import com.mrcong.bookmarkfilmsandcomicsapp.models.movies.SingleMovie;
+import com.mrcong.bookmarkfilmsandcomicsapp.response.MovieSearchResponse;
 import com.mrcong.bookmarkfilmsandcomicsapp.ultis.Constants;
 
-import java.io.IOException;
-import java.util.ArrayList;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import retrofit2.Call;
+import retrofit2.Callback;
 import retrofit2.Response;
 
 public class MovieApiClient {
+    // LiveData
+    private MutableLiveData<List<MovieModel>> searchMoviesLiveData;
+    private MutableLiveData<SingleMovie> singleMovieLiveData;
+
+    //Instance
     private static MovieApiClient instance;
-    private final String TAG = "MovieApiClient";
-    private MutableLiveData<List<QueryMovie>> queryMovies;
+    private static final String TAG = Constants.COMMON.TAG;
 
-    //Making Global RUNNABLE
-    private RetrieveMoviesRunnable retrieveMoviesRunnable;
+    // making Global RUNNABLE
+    private RetrieveSearchMoviesRunnable retrieveSearchMoviesRunnable;
+    private RetrieveSingleMovieRunnale retrieveSingleMovieRunnale;
 
-    public static MovieApiClient getInstance() {
+    public static MovieApiClient getInstance(){
         if (instance == null){
             instance = new MovieApiClient();
         }
-        return instance;
+        return  instance;
     }
 
     private MovieApiClient(){
-        queryMovies = new MutableLiveData<>();
+        searchMoviesLiveData = new MutableLiveData<>();
+        singleMovieLiveData = new MutableLiveData<>();
     }
 
-    public LiveData<List<QueryMovie>> getQueryMovies(){
-        return queryMovies;
+    //Getter for the live data, called by repository
+    public LiveData<List<MovieModel>> getSearchMoviesLiveData(){
+        return searchMoviesLiveData;
+    }
+    public LiveData<SingleMovie> getSingleMovieLiveData(){
+        return singleMovieLiveData;
     }
 
-    public void searchMoviesApi(String query, int pageNumber){
-        if (retrieveMoviesRunnable != null){
-            retrieveMoviesRunnable = null;
+    //These method that we are going to call through the classes
+    public void searchMoviesApi(String query, int pageNumber) {
+        if (retrieveSearchMoviesRunnable != null){
+            retrieveSearchMoviesRunnable = null;
         }
-        retrieveMoviesRunnable = new RetrieveMoviesRunnable(query, pageNumber);
-        final Future myHandler = AppExecutors.getInstance().getmNetworkIO().submit(retrieveMoviesRunnable);
-        //In 4s, if there isn't any request, no connections, low memory, cancel the handler.
+        retrieveSearchMoviesRunnable = new RetrieveSearchMoviesRunnable(query, pageNumber);
+        final Future myHandler = AppExecutors.getInstance().getmNetworkIO().submit(retrieveSearchMoviesRunnable);
         AppExecutors.getInstance().getmNetworkIO().schedule(new Runnable() {
             @Override
             public void run() {
-                //Canceling the retrofit call
+                // Cancelling the retrofit call
                 myHandler.cancel(true);
             }
-        }, 5000, TimeUnit.MICROSECONDS);
+        }, 5000, TimeUnit.MILLISECONDS);
     }
 
-    private class RetrieveMoviesRunnable implements Runnable{
+    public void requestSingleMovieApi(Integer movieId){
+        if(retrieveSingleMovieRunnale != null){
+            retrieveSingleMovieRunnale = null;
+        }
+        retrieveSingleMovieRunnale = new RetrieveSingleMovieRunnale(movieId);
+        final Future myHandler = AppExecutors.getInstance().getmNetworkIO().submit(retrieveSingleMovieRunnale);
+        AppExecutors.getInstance().getmNetworkIO().schedule(new Runnable() {
+            @Override
+            public void run() {
+                // Cancelling the retrofit call
+                myHandler.cancel(true);
+            }
+        }, 5000, TimeUnit.MILLISECONDS);
+    }
+
+    //Retrieving data from RestAPI by runnable class
+    //Search movies using runnable class
+    private class RetrieveSearchMoviesRunnable implements Runnable{
         private String query;
         private int pageNumber;
         boolean cancelRequest;
-
-        public RetrieveMoviesRunnable(String query, int pageNumber) {
+        private int maximumPageNumber;
+        public RetrieveSearchMoviesRunnable(String query, int pageNumber) {
             this.query = query;
             this.pageNumber = pageNumber;
-            this.cancelRequest = false;
+            cancelRequest = false;
         }
-
         @Override
         public void run() {
-            try {
-                Response response = getQueryMovies(query, pageNumber).execute();
-                if(cancelRequest){
-                    return;
-                }
-                if (response.code() == 200){
-                    List<QueryMovie> list = new ArrayList<>(((QueryMovieResponse)response.body())
-                            .getQueryMovies());
-                    if(pageNumber == 1){
-                        //Sending data to live data
-                        //Post value: used for background thread
-                        //Set values: not for background thread
-                        queryMovies.postValue(list);
-                    } else {
-                        List<QueryMovie> currentMovies = queryMovies.getValue();
-                        currentMovies.addAll(list);
-                        queryMovies.postValue(currentMovies);
-                    }
-                } else {
-                    String error = response.errorBody().string();
-                    Log.v(TAG, "Error: " + error);
-                    queryMovies.postValue(null);
-                }
-            } catch (IOException e) {
-                throw new RuntimeException(e);
+            if(cancelRequest){
+                return;
             }
+            RetrofitService.getMovieApi().searchMovie(Constants.CREDENTIAL.API_KEY, query, pageNumber).enqueue(new Callback<MovieSearchResponse>() {
+                @Override
+                public void onResponse(Call<MovieSearchResponse> call, Response<MovieSearchResponse> response) {
+                    List<MovieModel> movieModelList = response.body().getMovies();
+                    movieModelList = movieModelList.stream()
+                            .filter(movieModel -> movieModel.getPosterPath() != null)
+                            .sorted(Comparator.comparing(MovieModel::getReleaseDate).reversed())
+                            .collect(Collectors.toList());
+                    maximumPageNumber = response.body().getTotalPage();
+                    if(pageNumber <= maximumPageNumber){
+                        if(pageNumber == 1){
+                            searchMoviesLiveData.postValue(movieModelList);
+                        } else {
+                            List<MovieModel> currentMovies = searchMoviesLiveData.getValue();
+                            currentMovies.addAll(movieModelList);
+                            searchMoviesLiveData.postValue(currentMovies);
+                        }
+                    }
+                }
+                @Override
+                public void onFailure(Call<MovieSearchResponse> call, Throwable t) {
+                    Log.v(TAG, "Error: " + t.getMessage());
+                    searchMoviesLiveData.postValue(null);
+                }
+            });
         }
-        private Call<QueryMovieResponse> getQueryMovies(String query, int pageNumber){
-            return RetrofitService.getMovieApi().searchMovie(
-                    Constants.CREDENTIAL.API_KEY,
-                    query,
-                    pageNumber
-            );
+    }
+
+    //Get single movie using runnable class
+    private class RetrieveSingleMovieRunnale implements Runnable{
+        private Integer movieId;
+        private boolean cancelRequest;
+        public RetrieveSingleMovieRunnale(Integer movieId) {
+            this.movieId = movieId;
         }
-        private void doCancelRequest(){
-            Log.v(TAG, "Canceling Search Request");
-            cancelRequest = true;
+        private Call<SingleMovie> requestSingleMovies(){
+            return RetrofitService.getMovieApi().findById(movieId, Constants.CREDENTIAL.API_KEY);
+        }
+        @Override
+        public void run() {
+            if(cancelRequest){
+                return;
+            }
+            RetrofitService.getMovieApi().findById(movieId, Constants.CREDENTIAL.API_KEY).enqueue(new Callback<SingleMovie>() {
+                @Override
+                public void onResponse(Call<SingleMovie> call, Response<SingleMovie> response) {
+                    SingleMovie singleMovie = (SingleMovie) response.body();
+                    Log.v(TAG, "Request for single movie: " + singleMovie.toString());
+                    singleMovieLiveData.postValue(singleMovie);
+                }
+                @Override
+                public void onFailure(Call<SingleMovie> call, Throwable t) {
+                    Log.v(TAG, "Error: " + t.getMessage());
+                    searchMoviesLiveData.postValue(null);
+                }
+            });
         }
     }
 }

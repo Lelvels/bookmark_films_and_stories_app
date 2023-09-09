@@ -4,39 +4,35 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/material_dynamic_secondary40"
     tools:context=".MainActivity">
 
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/am_toolbar"
+        android:background="@color/purple_200"
         android:layout_width="0dp"
         android:layout_height="?attr/actionBarSize"
-        android:layout_marginBottom="10dp"
-        android:layout_marginTop="5sp"
-        android:theme="@style/ThemeOverlay.AppCompat.Light"
-        app:layout_constraintBottom_toTopOf="@+id/am_recycler_view"
+        android:layout_marginTop="0sp"
+        app:layout_constraintBottom_toTopOf="@+id/ma_recycler_view"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_scrollFlags="scroll|enterAlways"
         app:menu="@menu/toolbar_menu"
+        android:theme="@style/ThemeOverlay.AppCompat.Light"
         app:popupTheme="@style/ThemeOverlay.AppCompat.Light">
+
         <androidx.appcompat.widget.SearchView
-            android:id="@+id/am_search_view"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            app:iconifiedByDefault="false"
-            android:gravity="start"
-            android:background="@drawable/search_view_background"
-            app:queryBackground="@android:color/transparent"
-            app:queryHint="Search for movie?" />
+            android:id="@+id/am_search_view"
+            app:queryHint="Looking for a movie?"/>
     </androidx.appcompat.widget.Toolbar>
 
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/am_recycler_view"
+        android:id="@+id/ma_recycler_view"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

@@ -10,11 +10,7 @@ import com.google.gson.annotations.SerializedName;
 
 import java.util.List;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
-public class Movie implements Parcelable {
+public class SingleMovie implements Parcelable {
     @SerializedName("id")
     @Expose
     private Long id;
@@ -47,7 +43,7 @@ public class Movie implements Parcelable {
     private String overview;
     @SerializedName("popularity")
     @Expose
-    private Double popularity;
+    private Float popularity;
     @SerializedName("poster_path")
     @Expose
     private String posterPath;
@@ -77,12 +73,12 @@ public class Movie implements Parcelable {
     private String title;
     @SerializedName("vote_average")
     @Expose
-    private Double voteAverage;
+    private Float voteAverage;
     @SerializedName("vote_count")
     @Expose
     private Integer voteCount;
 
-    protected Movie(Parcel in) {
+    protected SingleMovie(Parcel in) {
         if (in.readByte() == 0) {
             id = null;
         } else {
@@ -105,7 +101,7 @@ public class Movie implements Parcelable {
         if (in.readByte() == 0) {
             popularity = null;
         } else {
-            popularity = in.readDouble();
+            popularity = in.readFloat();
         }
         posterPath = in.readString();
         releaseDate = in.readString();
@@ -125,7 +121,7 @@ public class Movie implements Parcelable {
         if (in.readByte() == 0) {
             voteAverage = null;
         } else {
-            voteAverage = in.readDouble();
+            voteAverage = in.readFloat();
         }
         if (in.readByte() == 0) {
             voteCount = null;
@@ -134,15 +130,103 @@ public class Movie implements Parcelable {
         }
     }
 
-    public static final Creator<Movie> CREATOR = new Creator<Movie>() {
+    public Long getId() {
+        return id;
+    }
+
+    public Boolean getAdult() {
+        return adult;
+    }
+
+    public String getBackdropPath() {
+        return backdropPath;
+    }
+
+    public Integer getBudget() {
+        return budget;
+    }
+
+    public List<Genre> getGenres() {
+        return genres;
+    }
+
+    public String getHomepage() {
+        return homepage;
+    }
+
+    public String getImdbId() {
+        return imdbId;
+    }
+
+    public String getOriginalLanguage() {
+        return originalLanguage;
+    }
+
+    public String getOriginalTitle() {
+        return originalTitle;
+    }
+
+    public String getOverview() {
+        return overview;
+    }
+
+    public Float getPopularity() {
+        return popularity;
+    }
+
+    public String getPosterPath() {
+        return posterPath;
+    }
+
+    public List<ProductionCountry> getProductionCountries() {
+        return productionCountries;
+    }
+
+    public String getReleaseDate() {
+        return releaseDate;
+    }
+
+    public Integer getRevenue() {
+        return revenue;
+    }
+
+    public Integer getRuntime() {
+        return runtime;
+    }
+
+    public List<SpokenLanguage> getSpokenLanguages() {
+        return spokenLanguages;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public String getTagline() {
+        return tagline;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public Float getVoteAverage() {
+        return voteAverage;
+    }
+
+    public Integer getVoteCount() {
+        return voteCount;
+    }
+
+    public static final Creator<SingleMovie> CREATOR = new Creator<SingleMovie>() {
         @Override
-        public Movie createFromParcel(Parcel in) {
-            return new Movie(in);
+        public SingleMovie createFromParcel(Parcel in) {
+            return new SingleMovie(in);
         }
 
         @Override
-        public Movie[] newArray(int size) {
-            return new Movie[size];
+        public SingleMovie[] newArray(int size) {
+            return new SingleMovie[size];
         }
     };
 
@@ -177,7 +261,7 @@ public class Movie implements Parcelable {
             dest.writeByte((byte) 0);
         } else {
             dest.writeByte((byte) 1);
-            dest.writeDouble(popularity);
+            dest.writeFloat(popularity);
         }
         dest.writeString(posterPath);
         dest.writeString(releaseDate);
@@ -200,7 +284,7 @@ public class Movie implements Parcelable {
             dest.writeByte((byte) 0);
         } else {
             dest.writeByte((byte) 1);
-            dest.writeDouble(voteAverage);
+            dest.writeFloat(voteAverage);
         }
         if (voteCount == null) {
             dest.writeByte((byte) 0);

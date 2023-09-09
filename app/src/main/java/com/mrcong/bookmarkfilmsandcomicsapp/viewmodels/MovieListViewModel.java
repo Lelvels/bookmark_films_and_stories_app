@@ -1,21 +1,27 @@
 package com.mrcong.bookmarkfilmsandcomicsapp.viewmodels;
 
 import androidx.lifecycle.LiveData;
-import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
-import com.mrcong.bookmarkfilmsandcomicsapp.models.movies.QueryMovie;
+import com.mrcong.bookmarkfilmsandcomicsapp.models.movies.MovieModel;
 import com.mrcong.bookmarkfilmsandcomicsapp.repositories.MovieRepository;
 
 import java.util.List;
 
 public class MovieListViewModel extends ViewModel {
-    private final MovieRepository movieRepository;
-
+    private MovieRepository movieRepository;
     public MovieListViewModel() {
-        this.movieRepository = MovieRepository.getInstance();
+        movieRepository = MovieRepository.getInstance();
     }
-    public LiveData<List<QueryMovie>> getMovies(){
-        return movieRepository.getQueryMovies();
+    //Function to get live data update, called by activity
+    public LiveData<List<MovieModel>> getMovies(){
+        return movieRepository.getSearchMovies();
+    }
+    //Calling method in view-model, called by activity
+    public void searchMovieApi(String query, int pageNumber){
+        movieRepository.searchMovieApi(query, pageNumber);
+    }
+    public void searchNextPage(){
+        movieRepository.searchNextPage();
     }
 }

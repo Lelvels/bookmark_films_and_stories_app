@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/tm_populars"
+        android:title="@string/populars"
+        android:icon="@android:drawable/ic_menu_gallery"
+        android:contentDescription="@string/populars"
+        app:showAsAction="always"/>
+    <item
+        android:id="@+id/tm_favourites"
+        android:title="@string/your_favourites"
+        android:icon="@android:drawable/btn_star"
+        app:showAsAction="always"/>
+    <item
+        android:id="@+id/tm_watch_later"
+        android:title="@string/watch_later"
+        android:icon="@android:drawable/ic_media_play"
+        app:showAsAction="collapseActionView"/>
+
+    <item
+        android:id="@+id/About"
+        android:title="About author"
+        android:icon="@android:drawable/ic_menu_info_details"
+        app:showAsAction="collapseActionView"/>
+</menu>
