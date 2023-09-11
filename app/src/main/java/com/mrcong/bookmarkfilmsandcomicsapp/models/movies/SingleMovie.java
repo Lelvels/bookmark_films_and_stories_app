@@ -13,7 +13,7 @@ import java.util.List;
 public class SingleMovie implements Parcelable {
     @SerializedName("id")
     @Expose
-    private Long id;
+    private Integer id;
     @SerializedName("adult")
     @Expose
     private Boolean adult;
@@ -82,7 +82,7 @@ public class SingleMovie implements Parcelable {
         if (in.readByte() == 0) {
             id = null;
         } else {
-            id = in.readLong();
+            id = in.readInt();
         }
         byte tmpAdult = in.readByte();
         adult = tmpAdult == 0 ? null : tmpAdult == 1;
@@ -130,7 +130,7 @@ public class SingleMovie implements Parcelable {
         }
     }
 
-    public Long getId() {
+    public Integer getId() {
         return id;
     }
 

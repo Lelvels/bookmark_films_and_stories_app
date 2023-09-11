@@ -3,7 +3,17 @@ package com.mrcong.bookmarkfilmsandcomicsapp.ultis;
 public class Constants {
     public static class COMMON{
         public static final String TAG = "FileBookMarkApp";
+        public static final String FAV_MOVIE_KEY = "favouriteMovies";
+        public static final String USER_KEY = "Users";
     }
+
+    public static class ARGS{
+        public static final String PREVIOUS_ACTIVITY_BUNDLE_KEY = "previousActivity";
+        public static final String POPULARS_FRAGMENT = "popular";
+        public static final String SEARCH_FRAGMENT = "search";
+        public static final String FAV_FRAGMENT = "fav";
+    }
+
     public static class CREDENTIAL{
         public static final String API_KEY = "0fa5805b0e9842d3696f8aa336885bbb";
     }

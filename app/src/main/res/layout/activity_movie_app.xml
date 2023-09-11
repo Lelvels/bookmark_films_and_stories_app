@@ -4,6 +4,53 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/white"
     tools:context=".MovieAppActivity">
+
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/maa_toolbar"
+        android:layout_width="0dp"
+        android:layout_height="?attr/actionBarSize"
+        android:layout_marginTop="10sp"
+        android:theme="@style/ThemeOverlay.AppCompat.Light"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_scrollFlags="scroll|enterAlways"
+        app:menu="@menu/toolbar_menu"
+        app:flow_horizontalBias="0.5"
+        app:popupTheme="@style/ThemeOverlay.AppCompat.Light">
+        <androidx.appcompat.widget.SearchView
+            android:id="@+id/maa_search_view"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            app:iconifiedByDefault="false"
+            android:gravity="start"
+            android:background="@drawable/search_view_background"
+            app:queryBackground="@android:color/transparent"
+            app:queryHint="Search for movie?" />
+    </androidx.appcompat.widget.Toolbar>
+
+    <FrameLayout
+        android:id="@+id/maa_fl_fragment"
+        android:layout_width="match_parent"
+        android:layout_height="0sp"
+        app:flow_horizontalBias="0.5"
+        android:layout_marginTop="10sp"
+        app:layout_constraintBottom_toTopOf="@id/maa_bottom_navigation"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/maa_toolbar" />
+
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/maa_bottom_navigation"
+        android:layout_width="match_parent"
+        android:layout_height="60sp"
+        app:flow_horizontalBias="0.5"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:menu="@menu/bottom_nav_menu" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

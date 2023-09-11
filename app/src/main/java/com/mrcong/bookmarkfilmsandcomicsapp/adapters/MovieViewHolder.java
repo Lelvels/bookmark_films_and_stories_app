@@ -12,7 +12,7 @@ import com.mrcong.bookmarkfilmsandcomicsapp.R;
 
 public class MovieViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
     //Widgets
-    TextView title, releaseDate, duration;
+    TextView title, releaseDate, movieLanguage;
     ImageView movieImage;
     RatingBar ratingBar;
     //Click Listener
@@ -23,7 +23,7 @@ public class MovieViewHolder extends RecyclerView.ViewHolder implements View.OnC
         this.onMovieListener = onMovieListener;
         title = itemView.findViewById(R.id.mli_movie_title);
         releaseDate = itemView.findViewById(R.id.mli_movie_release_date);
-        duration = itemView.findViewById(R.id.mli_movie_duration);
+        movieLanguage = itemView.findViewById(R.id.mli_movie_language);
         movieImage = itemView.findViewById(R.id.mli_movie_img);
         ratingBar = itemView.findViewById(R.id.mli_rating_bar);
         itemView.setOnClickListener(this);

@@ -35,7 +35,9 @@ public class MovieRepository {
     public void requestSingleMovie(Integer movieId){
         movieApiClient.requestSingleMovieApi(movieId);
     }
-
+    public void getMovieListByIds(List<Integer> movieIds){
+        movieApiClient.requestMovieListByIds(movieIds);
+    }
     //Called by Live model
     public LiveData<List<MovieModel>> getSearchMovies(){
         return movieApiClient.getSearchMoviesLiveData();
@@ -43,6 +45,10 @@ public class MovieRepository {
     public LiveData<SingleMovie> getSingleMovie(){
         return movieApiClient.getSingleMovieLiveData();
     }
+    public LiveData<List<SingleMovie>> getMovieList(){
+        return movieApiClient.getMoviesListByIds();
+    }
+
 }
 
 

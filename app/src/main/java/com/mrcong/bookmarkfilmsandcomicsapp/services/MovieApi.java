@@ -26,5 +26,8 @@ public interface MovieApi {
 
     //Get popular movies
     @GET("3/movie/popular")
-    Call<MovieSearchResponse> getPopularMovies();
+    Call<MovieSearchResponse> getPopularMovies(
+            @Query("api_key") String key,
+            @Query("page") Integer page
+    );
 }

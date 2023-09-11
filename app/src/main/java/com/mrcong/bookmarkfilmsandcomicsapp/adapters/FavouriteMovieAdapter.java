@@ -11,18 +11,20 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.mrcong.bookmarkfilmsandcomicsapp.R;
 import com.mrcong.bookmarkfilmsandcomicsapp.models.movies.MovieModel;
+import com.mrcong.bookmarkfilmsandcomicsapp.models.movies.SingleMovie;
 import com.mrcong.bookmarkfilmsandcomicsapp.ultis.Constants;
 
 import java.util.List;
 
-public class MovieRecyclerView extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+public class FavouriteMovieAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private static final String TAG = Constants.COMMON.TAG;
-    private List<MovieModel> mMovies;
+    private List<SingleMovie> mMovies;
     private OnMovieListener onMovieListener;
 
-    public MovieRecyclerView(OnMovieListener onMovieListener) {
+    public FavouriteMovieAdapter(OnMovieListener onMovieListener) {
         this.onMovieListener = onMovieListener;
     }
+
 
     @NonNull
     @Override
@@ -37,7 +39,7 @@ public class MovieRecyclerView extends RecyclerView.Adapter<RecyclerView.ViewHol
         holder = (MovieViewHolder) holder;
         ((MovieViewHolder) holder).title.setText(mMovies.get(position).getTitle());
         ((MovieViewHolder) holder).releaseDate.setText(mMovies.get(position).getReleaseDate());
-        ((MovieViewHolder) holder).duration.setText(mMovies.get(position).getOriginalLanguage());
+        ((MovieViewHolder) holder).movieLanguage.setText(mMovies.get(position).getOriginalLanguage());
         //Voting rate from 0 to 10
         ((MovieViewHolder) holder).ratingBar.setRating(mMovies.get(position).getVoteAverage()/2);
         //Image view with glide library
@@ -48,7 +50,7 @@ public class MovieRecyclerView extends RecyclerView.Adapter<RecyclerView.ViewHol
                 .into(((MovieViewHolder) holder).movieImage);
     }
 
-    public void setmMovies(List<MovieModel> mMovies) {
+    public void setmMovies(List<SingleMovie> mMovies) {
         this.mMovies = mMovies;
         notifyDataSetChanged();
     }
@@ -62,7 +64,7 @@ public class MovieRecyclerView extends RecyclerView.Adapter<RecyclerView.ViewHol
     }
 
     //Getting the id of the movie clicked
-    public MovieModel getSelectedMovie(int position){
+    public SingleMovie getSelectedMovie(int position){
         if(mMovies != null){
             if(mMovies.size() > 0){
                 return mMovies.get(position);

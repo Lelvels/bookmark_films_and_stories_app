@@ -2,25 +2,16 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
-        android:id="@+id/tm_populars"
-        android:title="@string/populars"
-        android:icon="@android:drawable/ic_menu_gallery"
-        android:contentDescription="@string/populars"
+        android:id="@+id/tm_user"
+        android:title="User"
+        android:icon="@drawable/icons8_user_filled_48"
+        android:contentDescription="User"
         app:showAsAction="always"/>
-    <item
-        android:id="@+id/tm_favourites"
-        android:title="@string/your_favourites"
-        android:icon="@android:drawable/btn_star"
-        app:showAsAction="always"/>
-    <item
-        android:id="@+id/tm_watch_later"
-        android:title="@string/watch_later"
-        android:icon="@android:drawable/ic_media_play"
-        app:showAsAction="collapseActionView"/>
 
     <item
-        android:id="@+id/About"
-        android:title="About author"
-        android:icon="@android:drawable/ic_menu_info_details"
-        app:showAsAction="collapseActionView"/>
+        android:id="@+id/tm_sign_out"
+        android:title="Logout"
+        android:icon="@drawable/icons8_sign_out_50"
+        android:contentDescription="Logout"
+        app:showAsAction="always"/>
 </menu>

@@ -10,4 +10,12 @@
     <string name="your_favourites">Your favourites</string>
     <string name="populars">Populars</string>
     <string name="watch_later">Watch later</string>
+    <string name="search">Search</string>
+    <string name="favourite">Favourite</string>
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="movie_tile">Movie tile</string>
+    <string name="movie_overview">Movie overview</string>
+    <string name="movie_genres">Movie genres</string>
+    <string name="add_to_your_favourite_text">Add to your favourite</string>
+    <string name="remove_to_your_favourite">Remove from your favourite</string>
 </resources>

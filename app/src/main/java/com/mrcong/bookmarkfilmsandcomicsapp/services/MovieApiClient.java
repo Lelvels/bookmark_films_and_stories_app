@@ -11,8 +11,7 @@ import com.mrcong.bookmarkfilmsandcomicsapp.models.movies.SingleMovie;
 import com.mrcong.bookmarkfilmsandcomicsapp.response.MovieSearchResponse;
 import com.mrcong.bookmarkfilmsandcomicsapp.ultis.Constants;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.Future;
@@ -24,18 +23,19 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class MovieApiClient {
-    // LiveData
-    private MutableLiveData<List<MovieModel>> searchMoviesLiveData;
-    private MutableLiveData<SingleMovie> singleMovieLiveData;
-
     //Instance
     private static MovieApiClient instance;
     private static final String TAG = Constants.COMMON.TAG;
-
+    // LiveData
+    private MutableLiveData<List<MovieModel>> searchMoviesLiveData;
+    private MutableLiveData<SingleMovie> singleMovieLiveData;
+    private MutableLiveData<List<SingleMovie>> movieListLiveData;
     // making Global RUNNABLE
     private RetrieveSearchMoviesRunnable retrieveSearchMoviesRunnable;
-    private RetrieveSingleMovieRunnale retrieveSingleMovieRunnale;
-
+    private RetrieveSingleMovieRunnable retrieveSingleMovieRunnable;
+    private RetrieveMovieListFromIdsRunnable retrieveMovieListFromIdsRunnable;
+    //Temp global single movie to save data
+    private SingleMovie tmpSingleMovie;
     public static MovieApiClient getInstance(){
         if (instance == null){
             instance = new MovieApiClient();
@@ -46,6 +46,7 @@ public class MovieApiClient {
     private MovieApiClient(){
         searchMoviesLiveData = new MutableLiveData<>();
         singleMovieLiveData = new MutableLiveData<>();
+        movieListLiveData = new MutableLiveData<>();
     }
 
     //Getter for the live data, called by repository
@@ -55,7 +56,9 @@ public class MovieApiClient {
     public LiveData<SingleMovie> getSingleMovieLiveData(){
         return singleMovieLiveData;
     }
-
+    public LiveData<List<SingleMovie>> getMoviesListByIds() {
+        return movieListLiveData;
+    }
     //These method that we are going to call through the classes
     public void searchMoviesApi(String query, int pageNumber) {
         if (retrieveSearchMoviesRunnable != null){
@@ -71,17 +74,29 @@ public class MovieApiClient {
             }
         }, 5000, TimeUnit.MILLISECONDS);
     }
-
     public void requestSingleMovieApi(Integer movieId){
-        if(retrieveSingleMovieRunnale != null){
-            retrieveSingleMovieRunnale = null;
+        if(retrieveSingleMovieRunnable != null){
+            retrieveSingleMovieRunnable = null;
         }
-        retrieveSingleMovieRunnale = new RetrieveSingleMovieRunnale(movieId);
-        final Future myHandler = AppExecutors.getInstance().getmNetworkIO().submit(retrieveSingleMovieRunnale);
+        retrieveSingleMovieRunnable = new RetrieveSingleMovieRunnable(movieId);
+        final Future myHandler = AppExecutors.getInstance().getmNetworkIO().submit(retrieveSingleMovieRunnable);
         AppExecutors.getInstance().getmNetworkIO().schedule(new Runnable() {
             @Override
             public void run() {
                 // Cancelling the retrofit call
+                myHandler.cancel(true);
+            }
+        }, 5000, TimeUnit.MILLISECONDS);
+    }
+    public void requestMovieListByIds(List<Integer> movieIds){
+        if(retrieveMovieListFromIdsRunnable != null){
+            retrieveMovieListFromIdsRunnable = null;
+        }
+        retrieveMovieListFromIdsRunnable = new RetrieveMovieListFromIdsRunnable(movieIds);
+        final Future myHandler = AppExecutors.getInstance().getmNetworkIO().submit(retrieveMovieListFromIdsRunnable);
+        AppExecutors.getInstance().getmNetworkIO().schedule(new Runnable() {
+            @Override
+            public void run() {
                 myHandler.cancel(true);
             }
         }, 5000, TimeUnit.MILLISECONDS);
@@ -133,14 +148,11 @@ public class MovieApiClient {
     }
 
     //Get single movie using runnable class
-    private class RetrieveSingleMovieRunnale implements Runnable{
+    private class RetrieveSingleMovieRunnable implements Runnable{
         private Integer movieId;
         private boolean cancelRequest;
-        public RetrieveSingleMovieRunnale(Integer movieId) {
+        public RetrieveSingleMovieRunnable(Integer movieId) {
             this.movieId = movieId;
-        }
-        private Call<SingleMovie> requestSingleMovies(){
-            return RetrofitService.getMovieApi().findById(movieId, Constants.CREDENTIAL.API_KEY);
         }
         @Override
         public void run() {
@@ -151,15 +163,51 @@ public class MovieApiClient {
                 @Override
                 public void onResponse(Call<SingleMovie> call, Response<SingleMovie> response) {
                     SingleMovie singleMovie = (SingleMovie) response.body();
-                    Log.v(TAG, "Request for single movie: " + singleMovie.toString());
                     singleMovieLiveData.postValue(singleMovie);
                 }
                 @Override
                 public void onFailure(Call<SingleMovie> call, Throwable t) {
-                    Log.v(TAG, "Error: " + t.getMessage());
+                    Log.v(TAG, "Failed to get movie with ID: " + movieId + " , error" + t.getMessage());
                     searchMoviesLiveData.postValue(null);
                 }
             });
+        }
+    }
+
+    //Get movie list from a lis using runnable class
+    private class RetrieveMovieListFromIdsRunnable implements Runnable{
+        private List<Integer> movieIds;
+        private boolean cancelRequest;
+        public RetrieveMovieListFromIdsRunnable(List<Integer> movieIds){
+            this.movieIds = movieIds;
+        }
+
+        @Override
+        public void run() {
+            if(cancelRequest){
+                return;
+            }
+            Log.v(TAG, "ApiClient movieIds: " + movieIds.size());
+            //Init the movie Live data first -> avoid NullPointerException
+            movieListLiveData.postValue(new ArrayList<>());
+            for(Integer movieId : movieIds){
+                RetrofitService.getMovieApi().findById(movieId, Constants.CREDENTIAL.API_KEY).enqueue(new Callback<SingleMovie>() {
+                    @Override
+                    public void onResponse(Call<SingleMovie> call, Response<SingleMovie> response) {
+                        SingleMovie singleMovie = (SingleMovie) response.body();
+                        Log.v(TAG, "ApiClient Movie Got: " + singleMovie.toString());
+                        List<SingleMovie> singleMovies = movieListLiveData.getValue();
+                        singleMovies.add(singleMovie);
+                        movieListLiveData.postValue(singleMovies);
+                    }
+
+                    @Override
+                    public void onFailure(Call<SingleMovie> call, Throwable t) {
+                        Log.v(TAG, "Failed to get movie with ID: " + movieId + " , error" + t.getMessage());
+                    }
+                });
+            }
+            Log.v(TAG, "Fav movies size from ApiClient: " + movieListLiveData.getValue().size());
         }
     }
 }

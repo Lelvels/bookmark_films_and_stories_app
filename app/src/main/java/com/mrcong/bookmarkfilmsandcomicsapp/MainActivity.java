@@ -11,24 +11,24 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.widget.Toast;
 
-import com.mrcong.bookmarkfilmsandcomicsapp.adapters.MovieRecyclerView;
+import com.mrcong.bookmarkfilmsandcomicsapp.adapters.MovieRecyclerViewAdapter;
 import com.mrcong.bookmarkfilmsandcomicsapp.adapters.OnMovieListener;
 import com.mrcong.bookmarkfilmsandcomicsapp.models.movies.MovieModel;
 import com.mrcong.bookmarkfilmsandcomicsapp.ultis.Constants;
-import com.mrcong.bookmarkfilmsandcomicsapp.viewmodels.MovieListViewModel;
+import com.mrcong.bookmarkfilmsandcomicsapp.viewmodels.SearchMovieListViewModel;
 
 import java.util.List;
 import java.util.Objects;
 
 public class MainActivity extends AppCompatActivity implements OnMovieListener {
     private static final String TAG = Constants.COMMON.TAG;
-    private MovieListViewModel movieListViewModel;
+    private SearchMovieListViewModel searchMovieListViewModel;
     private RecyclerView recyclerView;
-    private MovieRecyclerView movieRecyclerViewAdapter;
+    private MovieRecyclerViewAdapter movieRecyclerViewAdapter;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -45,7 +45,7 @@ public class MainActivity extends AppCompatActivity implements OnMovieListener {
 
         //Setup recycle view
         recyclerView = findViewById(R.id.am_recycler_view);
-        movieListViewModel = new ViewModelProvider(this).get(MovieListViewModel.class);
+        searchMovieListViewModel = new ViewModelProvider(this).get(SearchMovieListViewModel.class);
         observeAnyChange();
         configureRecyclerView();
     }
@@ -56,18 +56,27 @@ public class MainActivity extends AppCompatActivity implements OnMovieListener {
         return super.onCreateOptionsMenu(menu);
     }
 
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        if(item.getItemId() == R.id.tm_user){
+            Intent intent = new Intent(this, MovieAppActivity.class);
+            startActivity(intent);
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
     private void setupSearchView() {
         final SearchView searchView = findViewById(R.id.am_search_view);
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
-                movieListViewModel.searchMovieApi(query, 1);
+                searchMovieListViewModel.searchMovieApi(query, 1);
                 return false;
             }
 
             @Override
             public boolean onQueryTextChange(String newText) {
-                movieListViewModel.searchMovieApi(newText, 1);
+                searchMovieListViewModel.searchMovieApi(newText, 1);
                 return false;
             }
         });
@@ -75,13 +84,11 @@ public class MainActivity extends AppCompatActivity implements OnMovieListener {
 
     //Observing for any data changes
     private void observeAnyChange(){
-        movieListViewModel.getMovies().observe(this, new Observer<List<MovieModel>>() {
+        searchMovieListViewModel.getMovies().observe(this, new Observer<List<MovieModel>>() {
             @Override
             public void onChanged(List<MovieModel> movieModels) {
                 if (movieModels != null){
-                    for (MovieModel movieModel: movieModels){
-                        movieRecyclerViewAdapter.setmMovies(movieModels);
-                    }
+                    movieRecyclerViewAdapter.setmMovies(movieModels);
                 }
             }
         });
@@ -89,7 +96,7 @@ public class MainActivity extends AppCompatActivity implements OnMovieListener {
 
     private void configureRecyclerView(){
         //Live data cannot pass via the constructors
-        movieRecyclerViewAdapter = new MovieRecyclerView(this);
+        movieRecyclerViewAdapter = new MovieRecyclerViewAdapter(this);
         recyclerView.setAdapter(movieRecyclerViewAdapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         //RecyclerView Pagination
@@ -99,7 +106,7 @@ public class MainActivity extends AppCompatActivity implements OnMovieListener {
             public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
                 super.onScrollStateChanged(recyclerView, newState);
                 if(!recyclerView.canScrollVertically(1)){
-                    movieListViewModel.searchNextPage();
+                    searchMovieListViewModel.searchNextPage();
                 }
             }
         });
@@ -107,14 +114,9 @@ public class MainActivity extends AppCompatActivity implements OnMovieListener {
 
     @Override
     public void onMovieClick(int positions) {
-        //Toast.makeText(this, "Position: " + positions, Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "Position: " + positions, Toast.LENGTH_SHORT).show();
         Intent intent = new Intent(this, MovieDetailsActivity.class);
         intent.putExtra("movieId", movieRecyclerViewAdapter.getSelectedMovie(positions).getId());
         startActivity(intent);
-    }
-
-    @Override
-    public void onCategoryClick(String category) {
-
     }
 }
